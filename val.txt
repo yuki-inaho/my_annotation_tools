@@ -1,0 +1,2 @@
+/home/yoshi/data/parent_trunk_small/Image/2020-10-27_10:12:59.png /home/yoshi/data/parent_trunk_small/annotation/2020-10-27_10:12:59.png
+/home/yoshi/data/parent_trunk_small/Image/2020-10-27_10:16:13.png /home/yoshi/data/parent_trunk_small/annotation/2020-10-27_10:16:13.png
