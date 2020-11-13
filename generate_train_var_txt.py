@@ -10,7 +10,7 @@ import shutil
 SCRIPT_DIR = str(Path(__file__).parent)
 
 @click.command()
-@click.option("--input-image-dir", "-c", default=f"{SCRIPT_DIR}/data/mask")
+@click.option("--input-image-dir", "-i", default=f"{SCRIPT_DIR}/data/mask")
 @click.option("--train-var-rate", "-r", default=0.95)
 @click.option("--default-path", "-p", default="/home/yoshi/data")
 def main(input_image_dir, train_var_rate, default_path):
