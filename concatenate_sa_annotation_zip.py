@@ -6,11 +6,11 @@ import zipfile
 import pdb
 from tqdm import tqdm
 from pathlib import Path
-from typing import Dict, Any, NamedTuple
+from typing import Dict, Any, List, NamedTuple
 
 AnnotatedDataTuple = NamedTuple('AnnotatedDataTuple', [
      ('image_path', str),
-     ('annotation_dict', Dict[str, Any]),
+     ('annotated_polygon_data', List[Any]),
 ])
 
 ConfigJsonTuple = NamedTuple('ConfigJsonTuple', [
@@ -42,8 +42,9 @@ def extract_zip_files(zip_filepath_list, temporal_working_directory):
         output_dir_path = Path(temporal_working_directory, base_name)
         output_dir_path.mkdir()
         with zipfile.ZipFile(zip_file_path) as existing_zip:
-            existing_zip.extractall(output_dir_path)        
-        output_dir_path_list.append(output_dir_path_list)
+            existing_zip.extractall(output_dir_path)
+        output_dir_path_list.append(str(output_dir_path))
+    
     return output_dir_path_list
 
 
@@ -77,7 +78,7 @@ def generate_annotated_data_tuple(annotation_image_name_list, annotation_json, o
     for annotation_image_name in annotation_image_name_list:
         ann_data_tuple = AnnotatedDataTuple(
             image_path = str(Path(output_dir_path, "images", annotation_image_name)),
-            annotation_dict = annotation_json[annotation_image_name]
+            annotated_polygon_data = annotation_json[annotation_image_name]
         )
         annotated_data_tuple_list.append(ann_data_tuple)
     return annotated_data_tuple_list
@@ -116,7 +117,7 @@ def merge_annotated_data(dict_image_name_to_annotated_data_tuple):
     merged_annotation_dict = {}
     for image_name in dict_image_name_to_annotated_data_tuple.keys():
         annotated_data_tuple = dict_image_name_to_annotated_data_tuple[image_name]
-        merged_annotation_dict[image_name] = annotated_data_tuple.annotation_dict
+        merged_annotation_dict[image_name] = annotated_data_tuple.annotated_polygon_data
     return merged_annotation_dict
 
 
@@ -147,17 +148,15 @@ def generate_merged_annotation(config_json_tuple, dict_image_name_to_annotated_d
 @click.command()
 @click.option("--input-zip-directory", "-i", default=f"{HOME}/data/sa_zips_to_concat")
 @click.option("--temporal-working-directory", "-tmp", default=f"{SCRIPT_DIR}/concate_work_space")
-@click.option("--output-annotation-directory", "-i", default=f"{HOME}/data/sa_zips_to_concat")
+@click.option("--output-annotation-directory", "-i", default=f"{HOME}/data/concat_annotation")
 def main(input_zip_directory, temporal_working_directory, output_annotation_directory):
-
-    #generate_working_directory(temporal_working_directory)
-    #zip_filepath_list = get_input_zip_filepath_list(input_zip_directory)
-    #output_dir_path_list = extract_zip_files(zip_filepath_list, temporal_working_directory)
-    output_dir_pathes = Path(temporal_working_directory).glob("*")
-    output_dir_path_list = [str(output_dir_path) for output_dir_path in output_dir_pathes]
+    generate_working_directory(temporal_working_directory)
+    zip_filepath_list = get_input_zip_filepath_list(input_zip_directory)
+    output_dir_path_list = extract_zip_files(zip_filepath_list, temporal_working_directory)
     output_dir_path_list.sort()
 
     dict_image_name_to_annotated_data_tuple = {}
+
     for i, output_dir_path in enumerate(output_dir_path_list):
         if i==0:
             config_json_tuple = get_classes_and_config_json_tuple(output_dir_path)
