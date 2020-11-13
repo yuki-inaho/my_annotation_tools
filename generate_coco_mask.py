@@ -103,8 +103,7 @@ def get_prioritized_label_list(input_data_dir, class_mapper_json, priority_defin
 
 
 @click.command()
-# @click.option("--input-data-dir", "-i", default=f"{SCRIPT_DIR}")
-@click.option("--input-data-dir", "-i", default=f"/home/inaho/data/Nov 12 2020 19_41_coco")
+@click.option("--input-data-dir", "-i", default=f"{SCRIPT_DIR}/data")
 @click.option("--priority-definition-file", "-p", default=f"{SCRIPT_DIR}/classes_priority.txt")
 @click.option("--image-width", "-w", default=1920)
 @click.option("--image-height", "-h", default=1080)
