@@ -5,8 +5,8 @@ from pycocotools.coco import COCO
 from pathlib import Path
 import re
 import cv2
-import pdb
 import numpy as np
+import shutil
 from typing import Tuple, List
 
 SCRIPT_DIR = str(Path(__file__).parent.resolve())
@@ -104,10 +104,11 @@ def get_prioritized_label_list(input_data_dir, class_mapper_json, priority_defin
 
 @click.command()
 @click.option("--input-data-dir", "-i", default=f"{SCRIPT_DIR}/data")
+@click.option("--output-mask-dir", "-o", default=f"{SCRIPT_DIR}/mask")
 @click.option("--priority-definition-file", "-p", default=f"{SCRIPT_DIR}/classes_priority.txt")
 @click.option("--image-width", "-w", default=1920)
 @click.option("--image-height", "-h", default=1080)
-def main(input_data_dir, priority_definition_file, image_width, image_height):
+def main(input_data_dir, output_mask_dir, priority_definition_file, image_width, image_height):
     json_path = str(Path(input_data_dir, "takaune_train.json"))
     annotation_coco = COCO(json_path)
     image_size = (image_width, image_height)
@@ -146,11 +147,23 @@ def main(input_data_dir, priority_definition_file, image_width, image_height):
     name_mask_dict = {}
     for coco_annotation_mask_obj in coco_annotation_mask_obj_list:
         merged_mask = coco_annotation_mask_obj.merged_mask.copy()
-        name_mask_dict[coco_annotation_mask_obj.image_name] = colorize_mask(merged_mask, n_classes)
+        name_mask_dict[coco_annotation_mask_obj.image_name] = (merged_mask, colorize_mask(merged_mask, n_classes))
+
+    # Generate mask images
+    output_mask_dir_path = Path(output_mask_dir)
+    if output_mask_dir_path.exists():
+        shutil.rmtree(output_mask_dir_path)
+    output_mask_dir_path.mkdir()
 
     for name_mask in name_mask_dict.keys():
-        mask_name = Path(name_mask).name[:-4] + "_mask.png"
-        cv2.imwrite(mask_name, name_mask_dict[name_mask])
+        output_colorized_mask_name = "_colorized_" + Path(name_mask).name
+        output_mask_name = Path(name_mask).name
+        output_colorized_mask_path = str(Path(output_mask_dir_path, output_colorized_mask_name))
+        output_mask_path = str(Path(output_mask_dir_path, output_mask_name))
+
+        mask_image, colorized_mask_image = name_mask_dict[name_mask]
+        cv2.imwrite(output_mask_path, mask_image)
+        cv2.imwrite(output_colorized_mask_path, colorized_mask_image)
         cv2.waitKey(10)
 
 

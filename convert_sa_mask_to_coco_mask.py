@@ -22,9 +22,6 @@ def main(input_image_dir, output_image_dir):
         for i in range(3):
             mask[np.where(sa_mask[:, :, i] > 0)] = 255
         mask = cv2.resize(mask, (1920, 1080), interpolation=cv2.INTER_NEAREST)
-
-        pdb.set_trace()
-
         #mask = cv2.cvtColor(sa_mask, cv2.COLOR_RGB2GRAY)
         #mask *= 255
         base_name = Path(sa_mask_path).name
