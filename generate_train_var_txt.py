@@ -30,8 +30,10 @@ def main(input_image_dir, train_var_rate, default_path):
     for i, idx in enumerate(image_indices_shuffle):
         image_path = image_path_list[idx]
         base_name = Path(image_path).name
-        out_image_path = str(Path(default_path, "Image", base_name))
-        out_mask_path = str(Path(default_path, "annotation", base_name))
+        out_image_path = str(Path(default_path, "Image", base_name))    
+        base_mask_name = base_name
+        base_mask_name = base_mask_name.replace(".jpg", ".png")
+        out_mask_path = str(Path(default_path, "annotation", base_mask_name))
         image_mask_str = f"{out_image_path} {out_mask_path}\n"
         if i < thresh_idx:
             with open("./train.txt", mode="a") as f:

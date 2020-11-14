@@ -148,7 +148,7 @@ def generate_merged_annotation(config_json_tuple, dict_image_name_to_annotated_d
 @click.command()
 @click.option("--input-zip-directory", "-i", default=f"{HOME}/data/sa_zips_to_concat")
 @click.option("--temporal-working-directory", "-tmp", default=f"{SCRIPT_DIR}/concate_work_space")
-@click.option("--output-annotation-directory", "-i", default=f"{HOME}/data/concat_annotation")
+@click.option("--output-annotation-directory", "-o", default=f"{HOME}/data/concat_annotation")
 def main(input_zip_directory, temporal_working_directory, output_annotation_directory):
     generate_working_directory(temporal_working_directory)
     zip_filepath_list = get_input_zip_filepath_list(input_zip_directory)
