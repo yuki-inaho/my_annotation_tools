@@ -14,7 +14,8 @@ SCRIPT_DIR = str(Path(__file__).parent)
 @click.option("--train-var-rate", "-r", default=0.95)
 @click.option("--default-path", "-p", default="/home/yoshi/data")
 def main(input_image_dir, train_var_rate, default_path):
-    image_pathes = Path(input_image_dir).glob("*.png")
+    exts = ['.jpg', '.png']
+    image_pathes = sorted([path for path in Path(input_image_dir).rglob('*') if path.suffix.lower() in exts])
     image_path_list = [str(image_path) for image_path in image_pathes]
     n_image = len(image_path_list)
     image_indices_shuffle = np.arange(n_image)
