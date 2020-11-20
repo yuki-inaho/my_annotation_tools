@@ -17,11 +17,15 @@ def get_image_path_list(input_project_dir):
 @click.command()
 @click.option("--input-project-dir", "-i", default=f"{SCRIPT_DIR}/data")
 @click.option("--output-project-dir", "-o", default=f"{SCRIPT_DIR}/data_web")
-def main(input_project_dir, output_project_dir):
+@click.option("--add-tail", "-t", is_flag=True)
+def main(input_project_dir, output_project_dir, add_tail):
     image_path_list = get_image_path_list(input_project_dir)
     for image_path in tqdm(image_path_list):
         base_name = Path(image_path).name
-        write_name = base_name + "_____save.png"
+        if add_tail:
+            write_name = base_name + "_____save.png"
+        else:
+            write_name = base_name
         shutil.copy(image_path, str(Path(output_project_dir, write_name)))
 
 
