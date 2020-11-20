@@ -1,10 +1,7 @@
-import cv2
-import numpy as np
 import click
 from pathlib import Path
 from tqdm import tqdm
 import shutil
-import pdb
 
 
 SCRIPT_DIR = str(Path(__file__).parent)
@@ -15,6 +12,7 @@ def get_image_path_list(input_project_dir):
     image_pathes = sorted([path for path in Path(input_project_dir, "images").glob('*') if path.suffix.lower() in exts])
     image_path_list = [str(image_path) for image_path in image_pathes]
     return image_path_list
+
 
 @click.command()
 @click.option("--input-project-dir", "-i", default=f"{SCRIPT_DIR}/data")
