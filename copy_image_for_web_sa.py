@@ -23,7 +23,7 @@ def main(input_project_dir, output_project_dir):
         base_name = Path(image_path).name
         write_name = base_name + "_____save.png"
         shutil.copy(image_path, str(Path(output_project_dir, write_name)))
-        cv2.waitKey(10)
+
 
 if __name__ == "__main__":
     main()
