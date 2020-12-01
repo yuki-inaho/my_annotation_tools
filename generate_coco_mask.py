@@ -22,15 +22,15 @@ dict_idx2color = {
 }
 
 
-def get_image_num(input_data_dir):
-    image_dir_path = Path(input_data_dir, "train_set").glob("*.png")
-    image_path_list = [str(image_path) for image_path in image_dir_path]
+def get_image_num(input_data_dir, image_dir_name):
+    extf = [".png", ".jpg"]
+    image_path_list = [str(path) for path in Path(input_data_dir, image_dir_name).glob("*") if path.suffix in extf]
     return len(image_path_list)
 
 
-def get_class_mapper_json(input_data_dir):
+def get_class_mapper_json(input_data_dir, image_dir_name):
     class_mapper_json_path = str(
-        Path(input_data_dir, "train_set", "classes_mapper.json")
+        Path(input_data_dir, image_dir_name, "classes_mapper.json")
     )
     with open(class_mapper_json_path, "r") as f:
         class_mapper_json = json.load(f)
@@ -61,8 +61,8 @@ class COCO_ANNOTATION_MASK_IMAGE:
             self._label_mask_dict[label_name] = None
             self._label_to_index[label_name] = l+1
 
-    def set_mask(self, label_name, label_mask):
-        self._label_mask_dict[label_name] = label_mask
+    def set_mask(self, label_name, label_masks):
+        self._label_mask_dict[label_name] = label_masks
 
     @property
     def image_name(self):
@@ -81,14 +81,17 @@ class COCO_ANNOTATION_MASK_IMAGE:
         if len(self._prioritized_label_list) == 0:
             for i, label_name in enumerate(self._label_mask_dict.keys()):
                 if self._label_mask_dict[label_name] is not None:
-                    mask_image_ith_label = self._label_mask_dict[label_name]
-                    merged_mask_image[np.where(mask_image_ith_label > 0)] = i + 1
+                    masks = self._label_mask_dict[label_name]
+                    #mask_image_ith_label = self._label_mask_dict[label_name]
+                    for mask_image_ith_label in masks:
+                        merged_mask_image[np.where(mask_image_ith_label > 0)] = i + 1
         else:
             for label_name in self._prioritized_label_list:
                 if self._label_mask_dict[label_name] is not None:
-                    mask_image_ith_label = self._label_mask_dict[label_name]
-                    merged_mask_image[np.where(mask_image_ith_label > 0)] = self._label_to_index[label_name]
-
+                    masks = self._label_mask_dict[label_name]
+                    for mask_image_ith_label in masks:
+                        #mask_image_ith_label = self._label_mask_dict[label_name]
+                        merged_mask_image[np.where(mask_image_ith_label > 0)] = self._label_to_index[label_name]
         return merged_mask_image
 
 
@@ -108,15 +111,17 @@ def get_prioritized_label_list(input_data_dir, class_mapper_json, priority_defin
 @click.option("--priority-definition-file", "-p", default=f"{SCRIPT_DIR}/classes_priority.txt")
 @click.option("--image-width", "-w", default=1920)
 @click.option("--image-height", "-h", default=1080)
-def main(input_data_dir, output_mask_dir, priority_definition_file, image_width, image_height):
-    json_path = str(Path(input_data_dir, "takaune_train.json"))
+@click.option("--json-name", "-j", default="takaune_train.json")
+@click.option("--image-dir-name", "-id", default="train_set")
+def main(input_data_dir, output_mask_dir, priority_definition_file, image_width, image_height, json_name, image_dir_name):
+    json_path = str(Path(input_data_dir, json_name))
     annotation_coco = COCO(json_path)
     image_size = (image_width, image_height)
 
-    n_images = get_image_num(input_data_dir)
-    class_mapper_json = get_class_mapper_json(input_data_dir)
+    n_images = get_image_num(input_data_dir, image_dir_name)
+    class_mapper_json = get_class_mapper_json(input_data_dir, image_dir_name)
     classes = class_mapper_json.keys()
-    
+
     prioritized_label_list = get_prioritized_label_list(
         input_data_dir, class_mapper_json, priority_definition_file, classes
     )
@@ -141,8 +146,10 @@ def main(input_data_dir, output_mask_dir, priority_definition_file, image_width,
             )
             anns = annotation_coco.loadAnns(ann_ids)
             coco_annotation_mask_obj_list[img_id].image_name = img_name
-            annotaion_mask = annotation_coco.annToMask(anns[0])
-            coco_annotation_mask_obj_list[img_id].set_mask(class_name, annotaion_mask)
+            annotation_masks = []
+            for ann in anns:
+                annotation_masks.append(annotation_coco.annToMask(ann))
+            coco_annotation_mask_obj_list[img_id].set_mask(class_name, annotation_masks)
 
     name_mask_dict = {}
     for coco_annotation_mask_obj in coco_annotation_mask_obj_list:
