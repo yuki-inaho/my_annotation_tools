@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 import click
 from pathlib import Path
@@ -16,7 +15,7 @@ SCRIPT_DIR = str(Path(__file__).parent)
 @click.option("--default-path", "-p", default="/home/yoshi/data")
 def main(input_image_dir, train_var_rate, default_path):
     exts = ['.jpg', '.png']
-    image_pathes = sorted([path for path in Path(input_image_dir).rglob('*') if path.suffix.lower() in exts])
+    image_pathes = sorted([path for path in Path(input_image_dir).glob('*') if path.suffix.lower() in exts])
     image_path_list = [str(image_path) for image_path in image_pathes]
     n_image = len(image_path_list)
     image_indices_shuffle = np.arange(n_image)
@@ -31,18 +30,10 @@ def main(input_image_dir, train_var_rate, default_path):
     for i, idx in enumerate(image_indices_shuffle):
         image_path = image_path_list[idx]
         base_name = Path(image_path).name
-
-        annotation_path = image_path.replace("Image", "annotation")
-        annotation_path = annotation_path.replace(".jpg", ".png")
-        mask = cv2.imread(annotation_path,cv2.IMREAD_ANYDEPTH)
-        if mask.sum() == 0:
-            continue
-
-
-        out_image_path = str(Path(default_path, "Image", base_name))    
+        out_image_path = str(Path(default_path, "Image", base_name))
         base_mask_name = base_name
         base_mask_name = base_mask_name.replace(".jpg", ".png")
-        out_mask_path = str(Path(default_path, "annotation", base_mask_name))        
+        out_mask_path = str(Path(default_path, "annotation", base_mask_name))
         image_mask_str = f"{out_image_path} {out_mask_path}\n"
         if i < thresh_idx:
             with open("./train.txt", mode="a") as f:
