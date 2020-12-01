@@ -10,10 +10,16 @@ import pdb
 
 SCRIPT_DIR = str(Path(__file__).parent)
 
+def get_input_image_path_list(input_image_dir_path):
+    extf = [".jpg", ".png"]
+    input_image_path_list = [str(path) for path in input_image_dir_path.glob("*") if path.suffix in extf]
+    return np.sort(input_image_path_list)
+
+
 @click.command()
 @click.option("--config-file-path", "-c", default=f"{SCRIPT_DIR}/cfg/dualzense_out.toml")
-@click.option("--input-image-dir", "-c", default=f"{SCRIPT_DIR}/data/raw")
-@click.option("--output-image-dir", "-c", default=f"{SCRIPT_DIR}/data/undistorted")
+@click.option("--input-image-dir", "-i", default=f"{SCRIPT_DIR}/data/raw")
+@click.option("--output-image-dir", "-o", default=f"{SCRIPT_DIR}/data/undistorted")
 def main(config_file_path, input_image_dir, output_image_dir):
     # Define undistorter
     undistorter = LensUndistorter(config_file_path)
@@ -23,7 +29,7 @@ def main(config_file_path, input_image_dir, output_image_dir):
 
     # Get Images
     input_image_dir_path = Path(input_image_dir)
-    input_image_path_list = np.sort([str(image_path) for image_path in input_image_dir_path.glob("*.png")])
+    input_image_path_list = get_input_image_path_list(input_image_dir_path)
 
     for input_image_path in tqdm(input_image_path_list):
         image_raw = cv2.imread(input_image_path)
