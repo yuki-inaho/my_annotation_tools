@@ -8,6 +8,7 @@ from tqdm import tqdm
 from pathlib import Path
 from typing import Dict, Any, List, NamedTuple
 
+
 AnnotatedDataTuple = NamedTuple('AnnotatedDataTuple', [
      ('image_path', str),
      ('annotated_polygon_data', List[Any]),

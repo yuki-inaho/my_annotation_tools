@@ -8,7 +8,7 @@ import click
 @click.option("--output-dir", "-o", default="")
 @click.option("--dataset-name", "-n", default="takaune")
 def main(input_dir, output_dir, dataset_name):
-    if output_dir == "":        
+    if output_dir == "":
         base_name = Path(input_dir).name
         dir_name = str(Path(input_dir).parent)
         output_dir = str(Path(dir_name, f"{base_name}_coco"))

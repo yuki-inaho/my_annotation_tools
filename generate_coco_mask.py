@@ -163,6 +163,8 @@ def main(input_data_dir, output_mask_dir, priority_definition_file, image_width,
     output_mask_dir_path.mkdir()
 
     for name_mask in name_mask_dict.keys():
+        if name_mask is None:
+            continue
         output_colorized_mask_name = "_colorized_" + Path(name_mask).name
         output_mask_name = Path(name_mask).name
         output_colorized_mask_path = str(Path(output_mask_dir_path, output_colorized_mask_name))
