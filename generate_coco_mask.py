@@ -8,12 +8,13 @@ import cv2
 import numpy as np
 import shutil
 from typing import Tuple, List
+import pdb
 
 SCRIPT_DIR = str(Path(__file__).parent.resolve())
 
 
 dict_idx2color = {
-    0: (0, 0, 0),  
+    0: (0, 0, 0),
     1: (110, 110, 255),  # Oyagi
     2: (150, 249, 152),  # Aspara
     3: (255, 217, 81),  # Ground
@@ -26,6 +27,17 @@ def get_image_num(input_data_dir, image_dir_name):
     extf = [".png", ".jpg"]
     image_path_list = [str(path) for path in Path(input_data_dir, image_dir_name).glob("*") if path.suffix in extf]
     return len(image_path_list)
+
+
+def load_classes_json(classes_json_path):
+    with open(classes_json_path, "r") as f:
+        classes_json = json.load(f)
+
+    classes_dict = {}
+    n_class = len(classes_json)
+    for i in range(n_class):
+        classes_dict[classes_json[i]["name"]] = classes_json[i]["id"]
+    return classes_dict
 
 
 def get_class_mapper_json(input_data_dir, image_dir_name):
@@ -41,7 +53,7 @@ def colorize_mask(mask_image, n_label):
     mask_colorized = np.zeros(
         [mask_image.shape[0], mask_image.shape[1], 3], dtype=np.uint8
     )
-    for l in range(n_label + 1):
+    for l in range(n_label+1) :
         mask_indices_lth_label = np.where(mask_image == l)
         mask_colorized[mask_indices_lth_label[0], mask_indices_lth_label[1], :] = dict_idx2color[l]
     return mask_colorized
@@ -111,11 +123,14 @@ def get_prioritized_label_list(input_data_dir, class_mapper_json, priority_defin
 @click.option("--priority-definition-file", "-p", default=f"{SCRIPT_DIR}/classes_priority.txt")
 @click.option("--image-width", "-w", default=1920)
 @click.option("--image-height", "-h", default=1080)
-@click.option("--json-name", "-j", default="takaune_train.json")
-@click.option("--image-dir-name", "-id", default="train_set")
-def main(input_data_dir, output_mask_dir, priority_definition_file, image_width, image_height, json_name, image_dir_name):
+@click.option("--classes-json_path", "-c", default=f"{SCRIPT_DIR}/json/classes.json")
+@click.option("--json-name", "-j", default="takaune.json")
+@click.option("--image-dir-name", "-id", default="image_set")
+def main(input_data_dir, output_mask_dir, priority_definition_file, image_width, image_height, classes_json_path, json_name, image_dir_name):
     json_path = str(Path(input_data_dir, json_name))
     annotation_coco = COCO(json_path)
+    classes_dict = load_classes_json(classes_json_path)
+
     image_size = (image_width, image_height)
 
     n_images = get_image_num(input_data_dir, image_dir_name)
@@ -133,7 +148,8 @@ def main(input_data_dir, output_mask_dir, priority_definition_file, image_width,
     ]
 
     for class_name in classes:
-        cat_ids = annotation_coco.getCatIds(catNms=[class_name])
+        #cat_ids = annotation_coco.getCatIds(catNms=[class_name])
+        cat_ids = [classes_dict[class_name]]
         img_indices = annotation_coco.getImgIds(catIds=cat_ids)
 
         for img_ids in img_indices:
@@ -141,9 +157,7 @@ def main(input_data_dir, output_mask_dir, priority_definition_file, image_width,
             img_obj = annotation_coco.loadImgs(img_ids_tmp)[0]
             img_name = img_obj["file_name"]
             img_id = img_obj["id"]
-            ann_ids = annotation_coco.getAnnIds(
-                imgIds=img_id, catIds=cat_ids, iscrowd=None
-            )
+            ann_ids = annotation_coco.getAnnIds(imgIds=img_id, catIds=cat_ids, iscrowd=None)
             anns = annotation_coco.loadAnns(ann_ids)
             coco_annotation_mask_obj_list[img_id].image_name = img_name
             annotation_masks = []
