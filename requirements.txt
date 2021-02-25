@@ -3,5 +3,4 @@ opencv-python==4.4.0.46
 toml==0.10.2
 click==7.1.2
 tqdm==4.51.0
-superannotate==2.3.0
-
+superannotate==3.2.6
