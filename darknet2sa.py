@@ -5,11 +5,16 @@ import json
 from pathlib import Path
 from typing import NamedTuple, List
 from tqdm import tqdm
+from enum import IntEnum
 import pdb
 
 
 HOME_PATH = os.environ["HOME"]
 
+
+class Label(IntEnum):
+    Tip = 0
+    Whole = 1
 
 class ImageSize(NamedTuple):
     width: int
@@ -35,10 +40,12 @@ class BoundingBox:
 
     @property
     def bounding_box_sa(self):
-        x_min = self.x_coco
-        y_min = self.y_coco
-        x_max = x_min + self.w_coco
-        y_max = y_min + self.h_coco
+        w_half = int(self.w_coco / 2)
+        h_half = int(self.h_coco / 2)
+        x_min = self.x_coco - w_half
+        y_min = self.y_coco - h_half
+        x_max = self.x_coco + w_half
+        y_max = self.y_coco + h_half
         return x_min, x_max, y_min, y_max
 
     def bounding_box_darknet(self):
@@ -51,7 +58,7 @@ def cvt_bb_to_instance(bb_obj: BoundingBox):
         "type": "bbox",
         "classId": 1,
         "probability": 100,
-        "points": {"x1":x_min, "x2":x_max, "y1":y_min, "y2":y_max},
+        "points": {"x1": x_min, "x2": x_max, "y1": y_min, "y2": y_max},
         "groupId": 0,
         "pointLabels": {},
         "locked": False,
@@ -80,11 +87,16 @@ def get_image_pathes(input_dir_pathlib):
 def load_bounding_boxes_from_txt(ann_txt_path_str, image_size: ImageSize):
     with open(ann_txt_path_str) as f:
         bb_lines = f.readlines()
-    bb_list = [BoundingBox(image_size) for _ in range(len(bb_lines))]
+    bb_list = []
     for i, bb_line in enumerate(bb_lines):
         bb = bb_line.replace("\n", "").split(" ")
-        bb = [float(elem) for elem in bb[1:]]
-        bb_list[i].set_bounding_box_darknet(*bb)
+        label = int(bb[0])
+        if label != Label.Tip:
+            continue
+        bb_obj = BoundingBox(image_size)
+        bb_info = [float(elem) for elem in bb[1:]]
+        bb_obj.set_bounding_box_darknet(*bb_info)
+        bb_list.append(bb_obj)
     return bb_list
 
 
@@ -97,7 +109,7 @@ def dump_json(json_path, json_data):
 @click.option("--input-dir-path", "-i", default=f"{HOME_PATH}/data/200912_real_add_0825_27")
 @click.option("--output-dir-path", "-o", default=f"{HOME_PATH}/data/converted")
 @click.option("--image-width", "-w", type=int, default=1280)
-@click.option("--image-height", "-h", type=int, default=1280)
+@click.option("--image-height", "-h", type=int, default=720)
 def main(input_dir_path, output_dir_path, image_width, image_height):
     input_dir_pathlib = Path(input_dir_path)
     output_dir_pathlib = Path(output_dir_path)
@@ -119,11 +131,13 @@ def main(input_dir_path, output_dir_path, image_width, image_height):
         n_bb = len(bb_list)
         if n_bb >= 5:
             bb_count += 1
-            annotation_dict = bounding_box_list_to_annotation_dict(image_name, bb_list)        
+            annotation_dict = bounding_box_list_to_annotation_dict(image_name, bb_list)
             output_image_path = str(Path(output_dir_path, image_name))
-            output_annotation_path = str(Path(output_dir_path, image_name+".json"))
+            output_annotation_path = str(Path(output_dir_path, image_name + ".json"))
             shutil.copy(input_image_path, output_image_path)
             dump_json(output_annotation_path, annotation_dict)
+            if bb_count > bb_limit:
+                break
 
     print(bb_count)
 
