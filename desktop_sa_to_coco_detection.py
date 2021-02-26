@@ -2,13 +2,12 @@ import os
 import click
 import shutil
 import json
-import cv2
 from pathlib import Path
 
-from typing import NamedTuple, List
+from typing import List
 from tqdm import tqdm
 from enum import IntEnum
-import pdb
+from scripts.annotation import BoundingBox, ImageSize
 
 
 HOME_PATH = os.environ["HOME"]
@@ -18,40 +17,15 @@ class Label(IntEnum):
     Tip = 0
     Whole = 1
 
-class ImageSize(NamedTuple):
-    width: int
-    height: int
-
-
-class BoundingBox:
-    def __init__(self, image_size: ImageSize):
-        self._image_size = image_size
-
-    def set_bounding_box_darknet(self, x, y, w, h):
-        self._x_darknet = x
-        self._y_darknet = y
-        self._w_darknet = w
-        self._h_darknet = h
-        self._setting_bounding_box_coco_format()
-
-    def _setting_bounding_box_coco_format(self):
-        self.x_coco = int(self._x_darknet * self._image_size.width)
-        self.y_coco = int(self._y_darknet * self._image_size.height)
-        self.w_coco = int(self._w_darknet * self._image_size.width)
-        self.h_coco = int(self._h_darknet * self._image_size.height)
-
-    @property
-    def bounding_box_sa(self):
-        w_half = int(self.w_coco / 2)
-        h_half = int(self.h_coco / 2)
-        x_min = self.x_coco - w_half
-        y_min = self.y_coco - h_half
-        x_max = self.x_coco + w_half
-        y_max = self.y_coco + h_half
-        return x_min, x_max, y_min, y_max
-
-    def bounding_box_darknet(self):
-        return self.x_darknet, self.y_darknet, self.w_darknet, self.h_darknet
+class COCOObjectDetectionAnnotation:
+    def __init__(
+        self,
+        annotation_id:int,
+        image_name :str,
+        image_size: ImageSize,
+        class_id: int,
+        bb_obj: BoundingBox
+    ):
 
 
 def cvt_bb_to_instance(bb_obj: BoundingBox):
@@ -124,7 +98,7 @@ def main(input_dir_path, output_dir_path, image_width, image_height):
     input_image_size = ImageSize(image_width, image_height)
     input_image_path_list = get_image_pathes(input_dir_pathlib)
     for input_image_path in tqdm(input_image_path_list):
-        image_name = Path(input_image_path).name
+        image_name = Path(input_image_path).n支払いame
         image_ext = Path(input_image_path).suffix
         annotation_txt_name = image_name.replace(image_ext, ".txt")
         annotation_txt_path = str(Path(input_dir_path, annotation_txt_name))
