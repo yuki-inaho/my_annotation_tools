@@ -112,15 +112,17 @@ def dump_json(json_path, json_data):
 @click.option("--output-dir-path", "-o", default=f"{HOME_PATH}/data/converted")
 @click.option("--image-width", "-w", type=int, default=1280)
 @click.option("--image-height", "-h", type=int, default=720)
-def main(input_dir_path, output_dir_path, image_width, image_height):
+@click.option("--minimum-object-num", "-n", type=int, default=10)
+def main(input_dir_path, output_dir_path, image_width, image_height, minimum_object_num):
     input_dir_pathlib = Path(input_dir_path)
     output_dir_pathlib = Path(output_dir_path)
     if output_dir_pathlib.exists():
         shutil.rmtree(output_dir_path)
     output_dir_pathlib.mkdir()
 
+
+    # TODO: add comments
     bb_count = 0
-    minimum_obj_num = 10
     input_image_size = ImageSize(image_width, image_height)
     input_image_path_list = get_image_pathes(input_dir_pathlib)
     for input_image_path in tqdm(input_image_path_list):
@@ -129,7 +131,7 @@ def main(input_dir_path, output_dir_path, image_width, image_height):
         annotation_txt_name = image_name.replace(image_ext, ".txt")
         annotation_txt_path = str(Path(input_dir_path, annotation_txt_name))
         bb_list = load_bounding_boxes_from_txt(annotation_txt_path, input_image_size)
-        if len(bb_list) < minimum_obj_num:
+        if len(bb_list) < minimum_object_num:
             continue
         annotation_dict = bounding_box_list_to_annotation_dict(image_name, bb_list)
         output_image_path = str(Path(output_dir_path, image_name))
