@@ -29,6 +29,13 @@ class BoundingBox:
         self.w_coco = int(self._w_darknet * self._image_size.width)
         self.h_coco = int(self._h_darknet * self._image_size.height)
 
+    def set_bounding_box_xyxy(self, x_min, y_min, x_max, y_max):
+        self._x_darknet = x_min
+        self._y_darknet = y_min
+        self._w_darknet = x_max - x_min
+        self._h_darknet = y_max - y_min
+        self._setting_bounding_box_coco_format()
+
     @property
     def bounding_box_sa(self):
         w_half = int(self.w_coco / 2)

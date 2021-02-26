@@ -4,3 +4,5 @@ concate_work_space/
 test_sa_pixel/
 test_sa/
 test_coco/
+pyproject.toml
+scripts/__pycache__
