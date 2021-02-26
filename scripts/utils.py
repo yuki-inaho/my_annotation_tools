@@ -1,4 +1,6 @@
 import json
+from pathlib import Path
+import shutil
 
 
 def load_json(json_path):
@@ -17,3 +19,10 @@ def get_image_pathes(input_dir_pathlib):
     image_pathes = [path for path in input_dir_pathlib.glob("*") if path.suffix in extf]
     image_path_list = [str(image_path) for image_path in image_pathes]
     return image_path_list
+
+
+def mkdir_from_path(output_image_dir: str):
+    output_image_dir_path = Path(output_image_dir)
+    if output_image_dir_path.exists():
+        shutil.rmtree(output_image_dir)
+    output_image_dir_path.mkdir()
