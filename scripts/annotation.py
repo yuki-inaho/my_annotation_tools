@@ -7,6 +7,7 @@ class ImageSize(NamedTuple):
     height: int
 
 
+# TODO: include label info?
 class BoundingBox:
     def __init__(self, image_size: ImageSize):
         self._image_size = image_size
@@ -33,6 +34,10 @@ class BoundingBox:
         x_max = self.x_coco + w_half
         y_max = self.y_coco + h_half
         return x_min, x_max, y_min, y_max
+
+    @property
+    def bounding_box_coco(self):
+        return self.x_coco, self.y_coco, self.w_coco, self.h_coco
 
     @property
     def bounding_box_darknet(self):

@@ -1,13 +1,13 @@
 import os
 import click
 import shutil
-import json
-import cv2
 from pathlib import Path
 
 from typing import NamedTuple, List
 from tqdm import tqdm
 from enum import IntEnum
+from scripts.utils import load_json, dump_json, get_image_pathes
+from scripts.annotation import BoundingBox, ImageSize
 import pdb
 
 
@@ -17,41 +17,6 @@ HOME_PATH = os.environ["HOME"]
 class Label(IntEnum):
     Tip = 0
     Whole = 1
-
-class ImageSize(NamedTuple):
-    width: int
-    height: int
-
-
-class BoundingBox:
-    def __init__(self, image_size: ImageSize):
-        self._image_size = image_size
-
-    def set_bounding_box_darknet(self, x, y, w, h):
-        self._x_darknet = x
-        self._y_darknet = y
-        self._w_darknet = w
-        self._h_darknet = h
-        self._setting_bounding_box_coco_format()
-
-    def _setting_bounding_box_coco_format(self):
-        self.x_coco = int(self._x_darknet * self._image_size.width)
-        self.y_coco = int(self._y_darknet * self._image_size.height)
-        self.w_coco = int(self._w_darknet * self._image_size.width)
-        self.h_coco = int(self._h_darknet * self._image_size.height)
-
-    @property
-    def bounding_box_sa(self):
-        w_half = int(self.w_coco / 2)
-        h_half = int(self.h_coco / 2)
-        x_min = self.x_coco - w_half
-        y_min = self.y_coco - h_half
-        x_max = self.x_coco + w_half
-        y_max = self.y_coco + h_half
-        return x_min, x_max, y_min, y_max
-
-    def bounding_box_darknet(self):
-        return self.x_darknet, self.y_darknet, self.w_darknet, self.h_darknet
 
 
 def cvt_bb_to_instance(bb_obj: BoundingBox):
@@ -79,13 +44,6 @@ def bounding_box_list_to_annotation_dict(image_name: str, bb_list: List[Bounding
     return annotation_info
 
 
-def get_image_pathes(input_dir_pathlib):
-    extf = [".jpg", ".png"]
-    image_pathes = [path for path in input_dir_pathlib.glob("*") if path.suffix in extf]
-    image_path_list = [str(image_path) for image_path in image_pathes]
-    return image_path_list
-
-
 def load_bounding_boxes_from_txt(ann_txt_path_str, image_size: ImageSize):
     with open(ann_txt_path_str) as f:
         bb_lines = f.readlines()
@@ -100,11 +58,6 @@ def load_bounding_boxes_from_txt(ann_txt_path_str, image_size: ImageSize):
         bb_obj.set_bounding_box_darknet(*bb_info)
         bb_list.append(bb_obj)
     return bb_list
-
-
-def dump_json(json_path, json_data):
-    with open(json_path, "w") as f:
-        json.dump(json_data, f)
 
 
 @click.command()
