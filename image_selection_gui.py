@@ -73,6 +73,9 @@ def main(input_image_dir, output_txt_path):
                 np.savetxt(output_txt_path, selected_images, fmt="%s", delimiter=",")
 
         cvui.printf(frame, image_loc_end + 100, 600, 0.8, 0x00FF00, "Number of Selected Images:{}".format(len(selected_images)))
+
+        cvui.update()
+        cv2.imshow(window_name, frame)
         key = cv2.waitKey(20)
 
         if key & 0xFF == ord("l"):
@@ -88,9 +91,6 @@ def main(input_image_dir, output_txt_path):
                 selected_images.append(image_name)                
         if key == 27:
             break
-
-        cvui.update()
-        cv2.imshow(window_name, frame)
 
 
 if __name__ == "__main__":
