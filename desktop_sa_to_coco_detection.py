@@ -9,6 +9,7 @@ from tqdm import tqdm
 from enum import IntEnum
 from scripts.annotation import BoundingBox, ImageSize
 from scripts.utils import load_json, dump_json, get_image_pathes
+import pdb
 
 
 HOME_PATH = os.environ["HOME"]
@@ -27,7 +28,6 @@ class COCOInstanceAnnotation:
         image_name: str,
         image_size: ImageSize,
         annotation_id_list: List[int],
-        class_id_list: List[int],
         bb_obj_list: List[BoundingBox],
         licence_id: int = 1,
     ):
@@ -35,7 +35,6 @@ class COCOInstanceAnnotation:
         self._image_name = image_name
         self._image_size = image_size
         self._annotation_id_list = annotation_id_list
-        self._class_id_list = class_id_list
         self._bb_obj_list = bb_obj_list
         self._licence_id = licence_id
 
@@ -62,7 +61,7 @@ class COCOInstanceAnnotation:
                     "iscrowd": 0,
                     "bbox": [self._bb_obj_list[i].bounding_box_coco],
                     "area": self._bb_obj_list[i].area,
-                    "category_id": self._class_id_list[i],
+                    "category_id": self._bb_obj_list[i].category_id,
                 }
             )
         return dict_instances
@@ -143,15 +142,20 @@ def main(input_dir_path, output_dir_path, image_width, image_height):
         annotation_json_path = str(Path(input_dir_path, annotation_json_name))
 
         # Load annotation json
+        annotation_sa_data = load_json(annotation_json_path)
+        pdb.set_trace()
 
-        bb_list = load_bounding_boxes_from_txt(annotation_txt_path, input_image_size)
-        annotation_dict = bounding_box_list_to_annotation_dict(image_name, bb_list)
+        def extract_and_parse_sa_annotated_instance(annotation_sa_data):
+            instances_sa = annotation_sa_data["instances"]
+            n_instances = len(annotaion)
+            
+        sa = extract_and_parse_sa_annotated_instance(annotation_sa_data):
+#        def get_coco_annotation_data_from_sa(annotation_sa_data):
+
 
 
         output_image_path = str(Path(output_dir_path, image_name))
-        output_annotation_path = str(Path(output_dir_path, image_name + ".json"))
         shutil.copy(input_image_path, output_image_path)
-        dump_json(output_annotation_path, annotation_dict)
 
 
 if __name__ == "__main__":

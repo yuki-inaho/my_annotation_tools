@@ -23,7 +23,7 @@ def cvt_bb_to_instance(bb_obj: BoundingBox):
     x_min, x_max, y_min, y_max = bb_obj.bounding_box_sa
     bbox_instance_sa = {
         "type": "bbox",
-        "classId": 1,
+        "classId": bb_obj.category_id + 1, # 0 is assigned as "unlabeled" object
         "probability": 100,
         "points": {"x1": x_min, "x2": x_max, "y1": y_min, "y2": y_max},
         "groupId": 0,
@@ -56,6 +56,7 @@ def load_bounding_boxes_from_txt(ann_txt_path_str, image_size: ImageSize):
         bb_obj = BoundingBox(image_size)
         bb_info = [float(elem) for elem in bb[1:]]
         bb_obj.set_bounding_box_darknet(*bb_info)
+        bb_obj.set_category_id(label)
         bb_list.append(bb_obj)
     return bb_list
 
@@ -67,26 +68,32 @@ def load_bounding_boxes_from_txt(ann_txt_path_str, image_size: ImageSize):
 @click.option("--image-height", "-h", type=int, default=720)
 @click.option("--minimum-object-num", "-n", type=int, default=10)
 def main(input_dir_path, output_dir_path, image_width, image_height, minimum_object_num):
+    # Set input 
     input_dir_pathlib = Path(input_dir_path)
     output_dir_pathlib = Path(output_dir_path)
     if output_dir_pathlib.exists():
         shutil.rmtree(output_dir_path)
     output_dir_pathlib.mkdir()
 
-
-    # TODO: add comments
-    bb_count = 0
-    input_image_size = ImageSize(image_width, image_height)
+    # Get Image pathes from input image directory
     input_image_path_list = get_image_pathes(input_dir_pathlib)
+
+    bb_count = 0
+    input_image_size = ImageSize(image_width, image_height) # Assume all input images have the same size
     for input_image_path in tqdm(input_image_path_list):
+        # Get image & annotation path info
         image_name = Path(input_image_path).name
         image_ext = Path(input_image_path).suffix
         annotation_txt_name = image_name.replace(image_ext, ".txt")
         annotation_txt_path = str(Path(input_dir_path, annotation_txt_name))
+
+        # Get annotation data
         bb_list = load_bounding_boxes_from_txt(annotation_txt_path, input_image_size)
         if len(bb_list) < minimum_object_num:
             continue
         annotation_dict = bounding_box_list_to_annotation_dict(image_name, bb_list)
+
+        # Dump image and annotation data
         output_image_path = str(Path(output_dir_path, image_name))
         output_annotation_path = str(Path(output_dir_path, image_name + ".json"))
         shutil.copy(input_image_path, output_image_path)

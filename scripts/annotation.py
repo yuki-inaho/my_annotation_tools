@@ -11,6 +11,10 @@ class ImageSize(NamedTuple):
 class BoundingBox:
     def __init__(self, image_size: ImageSize):
         self._image_size = image_size
+        self._category_id = None
+
+    def set_category_id(self, category_id: int):
+        self._category_id = category_id
 
     def set_bounding_box_darknet(self, x, y, w, h):
         self._x_darknet = x
@@ -60,3 +64,7 @@ class BoundingBox:
         x_length = x_max - x_min
         y_length = y_max - y_min
         return y_length * x_length
+
+    @property
+    def category_id(self):
+        return self._category_id
