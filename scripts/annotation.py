@@ -1,5 +1,5 @@
 import numpy as np
-from typing import NamedTuple
+from typing import NamedTuple, List
 
 
 class ImageSize(NamedTuple):
@@ -57,7 +57,7 @@ class BoundingBox:
     @property
     def bounding_box_polypoints(self):
         x_min, x_max, y_min, y_max = self.bounding_box_sa
-        
+
         p1 = np.array([x_min, y_min])
         p2 = np.array([x_min, y_max])
         p3 = np.array([x_max, y_max])
@@ -75,3 +75,49 @@ class BoundingBox:
     @property
     def category_id(self):
         return self._category_id
+
+
+class COCOInstanceAnnotation:
+    def __init__(
+        self,
+        image_id: int,
+        image_name: str,
+        image_size: ImageSize,
+        annotation_id_list: List[int],
+        bb_object_list: List[BoundingBox],
+        licence_id: int = 1,
+    ):
+        self._image_id = image_id
+        self._image_name = image_name
+        self._image_size = image_size
+        self._annotation_id_list = annotation_id_list
+        self._bb_object_list = bb_object_list
+        self._licence_id = licence_id
+
+    @property
+    def image_property_dict(self):
+        return {
+            "id": self._image_id,
+            "file_name": self._image_name,
+            "height": self._image_size.height,
+            "width": self._image_size.width,
+            "license": self._licence_id,
+        }
+
+    @property
+    def instances_info_dict(self):
+        n_instance = len(self._bb_object_list)
+        dict_instances = []
+        for i in range(n_instance):
+            dict_instances.append(
+                {
+                    "id": self._annotation_id_list[i],
+                    "image_id": self._image_id,
+                    "segmentation": [self._bb_object_list[i].bounding_box_polypoints],
+                    "iscrowd": 0,
+                    "bbox": [self._bb_object_list[i].bounding_box_coco],
+                    "area": self._bb_object_list[i].area,
+                    "category_id": self._bb_object_list[i].category_id,
+                }
+            )
+        return dict_instances

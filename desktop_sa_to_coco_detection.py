@@ -9,8 +9,9 @@ import numpy as np
 from typing import List
 from tqdm import tqdm
 from enum import Enum
-from scripts.annotation import BoundingBox, ImageSize
+from scripts.annotation import BoundingBox, ImageSize, COCOInstanceAnnotation
 from scripts.utils import load_json, dump_json, get_image_pathes
+from datetime import datetime
 import pdb
 
 
@@ -19,53 +20,6 @@ HOME_PATH = os.environ["HOME"]
 
 class Label(Enum):
     Asparagus = 1
-
-
-# TODO: move to scripts/annotation.py script
-class COCOInstanceAnnotation:
-    def __init__(
-        self,
-        image_id: int,
-        image_name: str,
-        image_size: ImageSize,
-        annotation_id_list: List[int],
-        bb_object_list: List[BoundingBox],
-        licence_id: int = 1,
-    ):
-        self._image_id = image_id
-        self._image_name = image_name
-        self._image_size = image_size
-        self._annotation_id_list = annotation_id_list
-        self._bb_object_list = bb_object_list
-        self._licence_id = licence_id
-
-    @property
-    def image_property_dict(self):
-        return {
-            "id": self._image_id,
-            "file_name": self._image_name,
-            "height": self._image_size.height,
-            "width": self._image_size.width,
-            "license": self._licence_id,
-        }
-
-    @property
-    def instances_info_dict(self):
-        n_instance = len(self._bb_object_list)
-        dict_instances = []
-        for i in range(n_instance):
-            dict_instances.append(
-                {
-                    "id": self._annotation_id_list[i],
-                    "image_id": self._image_id,
-                    "segmentation": [self._bb_object_list[i].bounding_box_polypoints],
-                    "iscrowd": 0,
-                    "bbox": [self._bb_object_list[i].bounding_box_coco],
-                    "area": self._bb_object_list[i].area,
-                    "category_id": self._bb_object_list[i].category_id,
-                }
-            )
-        return dict_instances
 
 
 def extract_and_parse_sa_annotated_instance(annotation_sa_data, image_size: ImageSize) -> List[BoundingBox]:
@@ -83,6 +37,14 @@ def extract_and_parse_sa_annotated_instance(annotation_sa_data, image_size: Imag
     return bb_list
 
 
+class COCOAnnotationInfo:
+    def __init__(self):
+
+    def _set_date_info(self):
+        datetime.now()
+        self._year = 2021,
+        "date_created": "25/02/2021"
+
 @click.command()
 @click.option("--input-dir-path", "-i", default=f"{HOME_PATH}/data/aspara_tip_small")
 @click.option("--output-dir-path", "-o", default=f"{HOME_PATH}/data/aspara_tip_coco")
@@ -99,6 +61,7 @@ def main(input_dir_path, output_dir_path, image_width, image_height):
     input_image_size = ImageSize(image_width, image_height)  # assume all images have the same image size
     input_image_path_list = get_image_pathes(input_dir_pathlib)
     current_annotation_data_count = 0
+
     for image_index, input_image_path in enumerate(tqdm(input_image_path_list)):
         # Get image & annotation data path
         image_name = Path(input_image_path).name
@@ -114,8 +77,8 @@ def main(input_dir_path, output_dir_path, image_width, image_height):
         coco_instances_info = COCOInstanceAnnotation(image_index, image_name, input_image_size, annotation_id_list, bb_object_list)
         current_annotation_data_count += n_bounding_box
 
-        # @
 
+        # @
         output_image_path = str(Path(output_dir_path, image_name))
         shutil.copy(input_image_path, output_image_path)
 
