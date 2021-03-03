@@ -1,5 +1,5 @@
 import json
-from pathlib import Path
+from pathlib import Path, PosixPath
 import shutil
 
 
@@ -14,7 +14,7 @@ def dump_json(json_path, json_data):
         json.dump(json_data, f)
 
 
-def get_image_pathes(input_dir_pathlib):
+def get_image_pathes(input_dir_pathlib: PosixPath):
     extf = [".jpg", ".png"]
     image_pathes = [path for path in input_dir_pathlib.glob("*") if path.suffix in extf]
     image_path_list = [str(image_path) for image_path in image_pathes]

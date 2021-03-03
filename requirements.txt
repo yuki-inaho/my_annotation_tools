@@ -6,3 +6,4 @@ tqdm==4.51.0
 superannotate==3.2.6
 bidict==0.21.2
 cvui==2.7
+bidict==0.21.2
