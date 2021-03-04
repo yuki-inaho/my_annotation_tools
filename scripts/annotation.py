@@ -107,7 +107,7 @@ class COCOInstanceAnnotation:
     @property
     def instances_info_dict(self):
         n_instance = len(self._bb_object_list)
-        dict_instances = []
+        dict_instances = {}
         for i in range(n_instance):
             dict_instances.append(
                 {
