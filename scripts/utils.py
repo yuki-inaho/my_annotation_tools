@@ -11,7 +11,7 @@ def load_json(json_path):
 
 def dump_json(json_path, json_data):
     with open(json_path, "w") as f:
-        json.dump(json_data, f)
+        json.dump(json_data, f, ensure_ascii=False, indent=4)
 
 
 def get_image_pathes(input_dir_pathlib: PosixPath):
