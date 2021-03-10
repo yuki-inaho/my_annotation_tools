@@ -35,10 +35,16 @@ def main(input_dir_path, output_dir_path, classes_json):
         annotation_input_json_path = str(Path(input_dir_path, annotation_input_json_name))
         annotation_json = load_json(annotation_input_json_path)
         n_instances = len(annotation_json["instances"])
+
+        real_instance_count = 0
         for i in range(n_instances):
             instance_info_ith = annotation_json["instances"][i]
+            print(instance_info_ith["classId"])
+            if instance_info_ith["classId"] == -1:
+                continue
             instance_info_ith["className"] = annotation_class_manager.id2name(instance_info_ith["classId"])
-            annotation_json["instances"][i] = instance_info_ith
+            annotation_json["instances"][real_instance_count] = instance_info_ith
+            real_instance_count += 1
 
         # Dump image and annotation data
         output_image_path = str(Path(output_dir_path, image_name))
