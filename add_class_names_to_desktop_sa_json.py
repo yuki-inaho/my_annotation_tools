@@ -2,14 +2,9 @@ import os
 import click
 import shutil
 from pathlib import Path
-
-from typing import NamedTuple, List
 from tqdm import tqdm
-from enum import IntEnum
 from scripts.utils import load_json, dump_json, get_image_pathes, mkdir_from_path
-from scripts.annotation import BoundingBox, ImageSize
 from scripts.category import AnnotationClassManager
-import pdb
 
 
 HOME_PATH = os.environ["HOME"]
@@ -22,7 +17,6 @@ HOME_PATH = os.environ["HOME"]
 def main(input_dir_path, output_dir_path, classes_json):
     # Set input
     input_dir_pathlib = Path(input_dir_path)
-    output_dir_pathlib = Path(output_dir_path)
     mkdir_from_path(output_dir_path)
     annotation_class_manager = AnnotationClassManager(classes_json)
 
@@ -39,7 +33,6 @@ def main(input_dir_path, output_dir_path, classes_json):
         real_instance_count = 0
         for i in range(n_instances):
             instance_info_ith = annotation_json["instances"][i]
-            print(instance_info_ith["classId"])
             if instance_info_ith["classId"] == -1:
                 continue
             instance_info_ith["className"] = annotation_class_manager.id2name(instance_info_ith["classId"])
