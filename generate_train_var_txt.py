@@ -1,22 +1,22 @@
 import numpy as np
 import click
 from pathlib import Path
-from tqdm import tqdm
-import pdb
 import os
-import sys
-import shutil
+from scripts.utils import get_image_pathes
 
 SCRIPT_DIR = str(Path(__file__).parent)
 
 @click.command()
-@click.option("--input-image-dir", "-i", default=f"{SCRIPT_DIR}/data/mask")
+@click.option("--input-project-dir", "-i", default=f"{SCRIPT_DIR}/data")
 @click.option("--train-var-rate", "-r", default=0.95)
 @click.option("--default-path", "-p", default="/home/yoshi/data")
-def main(input_image_dir, train_var_rate, default_path):
-    exts = ['.jpg', '.png']
-    image_pathes = sorted([path for path in Path(input_image_dir).glob('*') if path.suffix.lower() in exts])
-    image_path_list = [str(image_path) for image_path in image_pathes]
+def main(input_project_dir, train_var_rate, default_path):
+    input_project_dir_pathlib = Path(input_project_dir)
+    input_image_dir_pathlib = input_project_dir_pathlib.joinpath("Image")
+
+    if not input_image_dir_pathlib.exists():
+        input_image_dir_pathlib = input_project_dir_pathlib
+    image_path_list = get_image_pathes(input_image_dir_pathlib)
     n_image = len(image_path_list)
     image_indices_shuffle = np.arange(n_image)
     np.random.shuffle(image_indices_shuffle)
