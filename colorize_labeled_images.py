@@ -34,12 +34,13 @@ def colorize_mask(mask_image: np.ndarray, color_manager: LabelColorManager):
 @click.command()
 @click.option("--input-data-dir", "-i", default=f"{SCRIPT_DIR}/data")
 @click.option("--output-data-dir", "-o", default=f"{SCRIPT_DIR}/output")
+@click.option("--annotation-dir-name", "-a", default=f"annotation")
 @click.option("--class-definition-json", "-c", default=f"{SCRIPT_DIR}/cfg/classes.json")
-def main(input_data_dir, output_data_dir, class_definition_json):
+def main(input_data_dir, annotation_dir_name, output_data_dir, class_definition_json):
     color_manager = LabelColorManager(class_definition_json)
     input_data_dir_pathlib = Path(input_data_dir)
     input_image_dir_pathlib = input_data_dir_pathlib.joinpath("Image")
-    input_annotation_dir_pathlib = input_data_dir_pathlib.joinpath("annotation")
+    input_annotation_dir_pathlib = input_data_dir_pathlib.joinpath(annotation_dir_name)
     mkdir_from_path(output_data_dir)
 
     image_path_list = get_image_pathes(input_image_dir_pathlib)
