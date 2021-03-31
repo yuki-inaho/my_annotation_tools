@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 
 from tqdm import tqdm
-from scripts.utils import read_json, write_json, get_image_pathes, mkdir_from_path
+from scripts.utils import load_json, dump_json, get_image_pathes, mkdir_from_path
 from scripts.category import AnnotationClassManager
 
 
@@ -30,7 +30,7 @@ def main(input_dir_path, output_dir_path, classes_json, flag_mkdir):
         image_name = Path(input_image_path).name
         annotation_input_json_name = image_name + ".json"
         annotation_input_json_path = str(Path(input_dir_path, annotation_input_json_name))
-        annotation_json = read_json(annotation_input_json_path)
+        annotation_json = load_json(annotation_input_json_path)
         n_instances = len(annotation_json["instances"])
         for i in range(n_instances):
             instance_info_ith = annotation_json["instances"][i]
@@ -43,9 +43,9 @@ def main(input_dir_path, output_dir_path, classes_json, flag_mkdir):
 
         if flag_mkdir:
             shutil.copy(input_image_path, output_image_path)
-            write_json(output_annotation_path, annotation_json)
+            dump_json(output_annotation_path, annotation_json)
         else:
-            write_json(annotation_input_json_path, annotation_json)
+            dump_json(annotation_input_json_path, annotation_json)
 
 
 if __name__ == "__main__":
