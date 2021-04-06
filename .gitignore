@@ -1,3 +1,4 @@
+annotation/
 image_to_extraction/
 image_extracted/
 concate_work_space/
@@ -5,4 +6,9 @@ test_sa_pixel/
 test_sa/
 test_coco/
 pyproject.toml
+poetry.lock
+superannotate-python-sdk/
 scripts/__pycache__
+train.txt
+test.txt
+test_aspara

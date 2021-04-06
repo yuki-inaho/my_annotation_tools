@@ -120,7 +120,7 @@ def get_prioritized_label_list(input_data_dir, class_mapper_json, priority_defin
 @click.command()
 @click.option("--input-data-dir", "-i", default=f"{SCRIPT_DIR}/data")
 @click.option("--output-mask-dir", "-o", default=f"{SCRIPT_DIR}/mask")
-@click.option("--priority-definition-file", "-p", default=f"{SCRIPT_DIR}/classes_priority.txt")
+@click.option("--priority-definition-file", "-p", default=f"{SCRIPT_DIR}/cfg/classes_priority.txt")
 @click.option("--image-width", "-w", default=1920)
 @click.option("--image-height", "-h", default=1080)
 @click.option("--classes-json_path", "-c", default=f"{SCRIPT_DIR}/json/classes.json")
