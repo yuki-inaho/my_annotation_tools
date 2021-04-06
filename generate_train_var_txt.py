@@ -8,10 +8,12 @@ SCRIPT_DIR = str(Path(__file__).parent)
 
 @click.command()
 @click.option("--input-project-dir", "-i", default=f"{SCRIPT_DIR}/data")
+@click.option("--output-dir", "-o", default=f"{SCRIPT_DIR}")
 @click.option("--train-var-rate", "-r", default=0.95)
 @click.option("--default-path", "-p", default="/home/yoshi/data")
-def main(input_project_dir, train_var_rate, default_path):
+def main(input_project_dir, output_dir, train_var_rate, default_path):
     input_project_dir_pathlib = Path(input_project_dir)
+    output_dir_pathlib = Path(output_dir)
     input_image_dir_pathlib = input_project_dir_pathlib.joinpath("Image")
 
     if not input_image_dir_pathlib.exists():
@@ -22,10 +24,12 @@ def main(input_project_dir, train_var_rate, default_path):
     np.random.shuffle(image_indices_shuffle)
     thresh_idx = np.floor(float(n_image) * train_var_rate)
 
-    if os.path.exists("./train.txt"):
-        os.remove("./train.txt")
-    if os.path.exists("./val.txt"):
-        os.remove("./val.txt")
+    train_txt_path = str(output_dir_pathlib.joinpath("train.txt"))
+    val_txt_path = str(output_dir_pathlib.joinpath("val.txt"))
+    if os.path.exists(train_txt_path):
+        os.remove(train_txt_path)
+    if os.path.exists(val_txt_path):
+        os.remove(val_txt_path)
 
     for i, idx in enumerate(image_indices_shuffle):
         image_path = image_path_list[idx]
@@ -36,10 +40,10 @@ def main(input_project_dir, train_var_rate, default_path):
         out_mask_path = str(Path(default_path, "annotation", base_mask_name))
         image_mask_str = f"{out_image_path} {out_mask_path}\n"
         if i < thresh_idx:
-            with open("./train.txt", mode="a") as f:
+            with open(train_txt_path, mode="a") as f:
                 f.write(image_mask_str)
         else:
-            with open("./val.txt", mode="a") as f:
+            with open(val_txt_path, mode="a") as f:
                 f.write(image_mask_str)
 
 
