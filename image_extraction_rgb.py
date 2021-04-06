@@ -11,11 +11,14 @@ from scripts.utils import mkdir_from_path
 
 SCRIPT_DIR = str(Path(__file__).parent)
 
+
 @click.command()
 @click.option("--input-image-dir", "-i", default=f"{SCRIPT_DIR}/data/image_to_extraction")
 @click.option("--output-image-dir", "-o", default=f"{SCRIPT_DIR}/data/image_extracted")
-def main(input_image_dir, output_image_dir):
-    image_pathes = Path(input_image_dir).glob("*_rgb.png")
+@click.option("--end-word", "-e", default="_rgb")
+@click.option("--image-format", "-f", default="png")
+def main(input_image_dir, output_image_dir, end_word, image_format):
+    image_pathes = Path(input_image_dir).glob(f"*{end_word}.{image_format}")
     image_path_list = [str(image_path) for image_path in image_pathes]
     mkdir_from_path(output_image_dir)
 
@@ -25,7 +28,6 @@ def main(input_image_dir, output_image_dir):
         to_image_path = Path(output_image_dir, base_name)
         shutil.copy(from_image_path, to_image_path)
 
+
 if __name__ == "__main__":
-
     main()
-
