@@ -17,7 +17,6 @@ def hex_to_rgb(color_hex: str) -> Tuple[str]:
     return color_rgb_cv2
 
 
-
 class AnnotationClassManager:
     def __init__(self, class_json_path: str):
         self._annotation_info_list = []
@@ -54,6 +53,7 @@ class AnnotationClassManager:
     @property
     def n_class(self):
         return self._n_class
+
 
 class LabelColorManager:
     def __init__(self, class_definition_json_path: str):
