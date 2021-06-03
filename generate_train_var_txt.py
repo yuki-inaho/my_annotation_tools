@@ -1,19 +1,40 @@
-import numpy as np
-import click
-from pathlib import Path
 import os
+import shutil
+import argparse
+import numpy as np
+from pathlib import Path
 from scripts.utils import get_image_pathes
 
 SCRIPT_DIR = str(Path(__file__).parent)
+USERNAME = os.getenv("USER")
 
-@click.command()
-@click.option("--input-project-dir", "-i", default=f"{SCRIPT_DIR}/data")
-@click.option("--output-dir", "-o", default=f"{SCRIPT_DIR}")
-@click.option("--train-var-rate", "-r", default=0.95)
-@click.option("--default-path", "-p", default="/home/yoshi/data")
+
+def get_image_pathes(input_dir_pathlib: Path):
+    extf = [".jpg", ".png"]
+    image_pathes = [path for path in input_dir_pathlib.glob("*") if path.suffix in extf]
+    image_path_list = [str(image_path) for image_path in image_pathes]
+    return image_path_list
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="A script to generate train-validation splitted image list files")
+    parser.add_argument("--input-project-dir", "-i", default=f"{SCRIPT_DIR}/data")
+    parser.add_argument("--output-dir", "-o", default="")
+    parser.add_argument("--train-var-rate", "-r", default=0.95)
+    parser.add_argument("--default-path", "-p", default=f"/home/{USERNAME}/data")
+    return parser
+
+
 def main(input_project_dir, output_dir, train_var_rate, default_path):
     input_project_dir_pathlib = Path(input_project_dir)
-    output_dir_pathlib = Path(output_dir)
+    is_output_same_dir = output_dir == ""
+    output_dir_path = output_dir if not is_output_same_dir else input_project_dir
+    output_dir_pathlib = Path(output_dir_path)
+    if not is_output_same_dir:
+        if output_dir_pathlib.exists():
+            shutil.rmtree(output_dir_path)
+        output_dir_pathlib.mkdir()
+
     input_image_dir_pathlib = input_project_dir_pathlib.joinpath("Image")
 
     if not input_image_dir_pathlib.exists():
@@ -48,4 +69,7 @@ def main(input_project_dir, output_dir, train_var_rate, default_path):
 
 
 if __name__ == "__main__":
-    main()
+    parser = parse_args()
+    args = parser.parse_args()
+
+    main(args.input_project_dir, args.output_dir, args.train_var_rate, args.default_path)
