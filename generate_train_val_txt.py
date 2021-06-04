@@ -20,7 +20,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="A script to generate train-validation splitted image list files")
     parser.add_argument("--input-project-dir", "-i", default=f"{SCRIPT_DIR}/data")
     parser.add_argument("--output-dir", "-o", default="")
-    parser.add_argument("--train-var-rate", "-r", default=0.95)
+    parser.add_argument("--train-var-rate", "-r", type=float, default=0.95)
     parser.add_argument("--default-path", "-p", default=f"/home/{USERNAME}/data")
     return parser
 
