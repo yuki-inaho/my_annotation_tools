@@ -1,10 +1,9 @@
-numpy==1.19.4
-opencv-python==4.4.0.46
+superannotate==3.2.6
+ffmpeg-python
+opencv-python
 toml==0.10.2
 click==7.1.2
 tqdm==4.51.0
-superannotate==3.2.6
 bidict==0.21.2
 cvui==2.7
 bidict==0.21.2
-ffmpeg-python==0.1.18
